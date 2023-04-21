@@ -1,0 +1,100 @@
+unit Unit1;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, ExtCtrls, Types, StdCtrls;
+
+type
+  TForm1 = class(TForm)
+    Image1: TImage;
+    Timer1: TTimer;
+    procedure FormCreate(Sender: TObject);
+    procedure Timer1Timer(Sender: TObject);
+    procedure MouseDown(Sender: TObject; Button: TMouseButton;Shift: TShiftState; X, Y: Integer);
+
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+const BackColor = clWhite;
+      ForeColor = clRed;
+
+var
+  Form1: TForm1;
+  hour, min, sec, oth : word;
+  radius: integer;
+  H: HWND;
+
+implementation
+{$R *.dfm}
+procedure TForm1.FormCreate(Sender: TObject);
+
+begin
+  Form1.BorderStyle:=bsNone; // delete WINDOWS FORM window
+  H:=CreateRoundRectRgn(1,1,Form1.Width,form1.Height,1600,1600);
+  SetWindowRgn(Form1.Handle,h,true);
+  Image1.Canvas.Font.Name:='Tahoma';
+  Image1.Canvas.Brush.Color := BackColor;
+  Image1.Canvas.FillRect(Rect(0, 0, Image1.Width, Image1.Height));
+  //Image1.Canvas.Ellipse(100,100,0,0);
+  radius := Image1.Width div 2;
+
+end;
+
+procedure TForm1.MouseDown(Sender: TObject; Button: TMouseButton;Shift: TShiftState; X, Y: Integer);
+const SC_DragMove = $F012;
+begin
+ReleaseCapture;
+perform(WM_SysCommand, SC_DragMove, 0);
+end;
+
+
+procedure TForm1.Timer1Timer(Sender: TObject);
+
+var
+  xh, yh, xm, ym, xs, ys, grad: integer;
+
+begin
+
+Image1.Canvas.Font.Name:='Tahoma';
+Image1.Canvas.Pen.Color := clBlack;
+Image1.Canvas.Pen.Width := 1;
+Image1.Canvas.FillRect(Rect(0, 0, Image1.Width, Image1.Height));
+//Image1.Canvas.Ellipse(radius*2,radius*2,0,0);
+DecodeTime(Now, hour, min, sec, oth);
+
+Image1.Canvas.TextOut(radius, radius*2-20, IntToStr(12));
+
+radius := (Image1.Width div 2);
+
+Image1.Canvas.MoveTo(radius, radius); //seconds start paint
+Image1.Canvas.Pen.Color := ForeColor;
+Image1.Canvas.Pen.Width := 1;
+
+ys:=round(radius *sin(-2.5*pi+pi*(sec/30)))+ radius;  //seconds
+xs:=round(radius *cos(-2.5*pi+pi*(sec/30)))+ radius;
+Image1.Canvas.LineTo(xs, ys);
+
+
+Image1.Canvas.MoveTo(radius, radius); // minutes  start paint
+Image1.Canvas.Pen.Color := clBlue;
+Image1.Canvas.Pen.Width := 2;
+
+ym:=round((radius*0.85) *sin(-2.5*pi+pi*(min/30)))+ radius;  //minutes
+xm:=round((radius*0.85) *cos(-2.5*pi+pi*(min/30)))+ radius;
+Image1.Canvas.LineTo(xm, ym);
+
+Image1.Canvas.MoveTo(radius, radius); // hours  start paint
+Image1.Canvas.Pen.Color := clBlack;
+Image1.Canvas.Pen.Width := 3;
+
+yh:=round((radius*0.75) *sin(-2.5*pi+pi*((hour*2.5)/30)))+ radius;  //hours
+xh:=round((radius*0.75) *cos(-2.5*pi+pi*((hour*2.5)/30)))+ radius;
+Image1.Canvas.LineTo(xh, yh);
+end;
+
+end.
